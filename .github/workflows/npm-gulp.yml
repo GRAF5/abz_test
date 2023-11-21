@@ -7,31 +7,33 @@ on:
     branches: [ "main" ]
 
 jobs:
-  build:
+  test:
     runs-on: ubuntu-latest
 
-    strategy:
-      matrix:
-        node-version: [18.x]
-    
+    services:
+      postgres:
+        image: postgres:latest
+        ports:
+          - 5432:5432
+        env:
+          POSTGRES_DB: abz_test
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: admin
+
     steps:
-    - uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v2
 
-    - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v3
-      with:
-        node-version: ${{ matrix.node-version }}
-    - name: Load MongoDB binary cache
-      id: cache-mongodb-binaries
-      uses: actions/cache@v3
-      with:
-        path: ~/.cache/mongodb-binaries
-        key: ${{ matrix.node-version }}
+      - name: Setup Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '18'
 
-    - name: Build
-      run: |
-        apt-get update
-        apt-get install libcurl4
-        rm -rf node_modules package-lock.json && npm install
-        npx sequelize-cli db:migrate --env test
-        npm test
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run Sequelize migrations
+        run: npx sequelize-cli db:migrate --env test
+
+      - name: Run tests
+        run: npm test 
