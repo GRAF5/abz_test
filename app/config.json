@@ -11,6 +11,5 @@
     "secretAccessKey": "K0036Vr4SE5oM1BnizRFQn/YJL7o+j4",
     "region": "eu-central-003",
     "bucket": "abz-test"
-  },
-  "usersUrl": "http://localhost:3000"
+  }
 }

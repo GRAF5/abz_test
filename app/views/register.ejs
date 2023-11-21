@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>ABZ Test</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Open+Sans');
+    header {
+      background-color: var(--background-color);
+      width: -moz-available; 
+      width: -webkit-fill-available;
+      width: fill-available;
+      display: flex;
+      justify-content: space-between;
+      padding: 0 35px;
+    }
+    header a {
+      color: var(--symbol-color);
+      height: 60px;
+      padding: 0 8px;
+      display: flex;
+      align-items: center;
+      text-decoration: none;
+    }
+    header > div {
+      display: flex;
+    }
+    #content {
+      height: 100%;
+      flex: 1 1 auto;
+      display: flex;
+      justify-content: center;
+    }
+    body {
+      margin: 0;
+      background-color: var(--foreground-color);
+      color: var(--symbol-color);
+    
+      --background-color: #181818;
+      --foreground-color: #1f1f1f;
+      --border-color: #353535;
+      --scrollbar-foreground-color: #2b2b2b;
+      --hover-color: #303030;
+      --symbol-color: #9d9d9d;
+    
+      --main-color: #1941DF;
+      --second-color: #3264FF;
+      --main-danger-color: #FF5454;
+      --second-danger-color: #ffd6db;
+      --green-color: #19c37d;
+    }
+    button {
+      width: 100%;
+      height: fit-content;
+      cursor: pointer;
+      background-color: var(--main-color);
+      color: white;
+      padding: 0 20px;
+      border-radius: 0px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 41px;
+      text-decoration: none;
+      border: 0;
+    }
+    .container-widjet {
+      padding: 10px 20px;
+      max-width: 600px;
+      align-self: center;
+      background-color: var(--foreground-color);
+    }
+    input, select {
+      width: 100%;
+      height: 41px;
+      border: 1px solid var(--border-color);
+      padding: 0 14px;
+      box-sizing: border-box;
+      border-radius: 0px;
+      outline: none;
+      margin-bottom: 1em;
+    }
+    #errors {
+      margin: 0;
+      margin-bottom: 10px;
+      color: var(--main-danger-color);
+      padding: 6px 16px;
+      border-radius: 0px;
+    }
+    * {
+      font-family: 'Open Sans';
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div>
+      <a href="/">Home</a>
+      <a href="/users-list">Users List</a>
+    </div>
+    <a href="/register">Register</a>
+  </header>
+  <div id="content">
+    <div class="container-widjet">
+      <h1>Register</h1>
+      <ul id="errors"></ul>
+      <form id="register"> 
+        <label>Name:</label>
+        <input id="name" name="name"/>
+        <label>Email:</label>
+        <input id="email" name="email"/>
+        <label>Phone:</label>
+        <input id="phone" name="phone"/>
+        <label>Position:</label>
+        <select id="position" name="position_id">
+        </select>
+        <label>Photo:</label>
+        <input id="photo" name="photo" type="file" />
+        <button>Register</button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      fetch(`${window.location.origin}/positions`)
+        .then(response => response.json())
+        .then(response => {
+          const position = document.getElementById('position');
+
+          response.positions.forEach(pos => {
+            const option = document.createElement('option');
+            option.setAttribute('value', pos.id);
+            option.innerText = pos.name;
+            position.appendChild(option);
+          });
+        });
+    });
+    const form = document.getElementById('register');
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      let token;
+      await fetch(`${window.location.origin}/token`)
+        .then(response => response.json())
+        .then(response => token = response.token);
+
+      await fetch(`${window.location.origin}/users`, {
+        method: 'POST',
+        headers: {token},
+        body: new FormData(form)
+      })
+        .then(response => response.json())
+        .then(response => {
+          if (!response.success) {
+            throw response;
+          } else {
+            window.location.replace(`${window.location.origin}/users-list`);
+          }
+        })
+        .catch(response => {
+          const errors = document.getElementById('errors');
+          while (errors.firstChild) {
+            errors.removeChild(errors.firstChild);
+          }
+          let fails = [];
+          for (let prop of Object.keys(response.fails || {})) {
+            fails = fails.concat(response[prop]);
+          }
+          if (response.message) {
+            fails.push(response.message);
+          }
+          for (let fail of fails) {
+            const error = document.createElement('li');
+            error.innerText = fail;
+            errors.appendChild(error);
+          }
+        });
+    });
+  </script>
+</body>
+</html>

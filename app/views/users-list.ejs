@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>ABZ Test</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Open+Sans');
+    header {
+      background-color: var(--background-color);
+      width: -moz-available; 
+      width: -webkit-fill-available;
+      width: fill-available;
+      display: flex;
+      justify-content: space-between;
+      padding: 0 35px;
+    }
+    header a {
+      color: var(--symbol-color);
+      height: 60px;
+      padding: 0 8px;
+      display: flex;
+      align-items: center;
+      text-decoration: none;
+    }
+    header > div {
+      display: flex;
+    }
+    #content {
+      height: 100%;
+      padding: 0 35px;
+    }
+    body {
+      margin: 0;
+      background-color: var(--foreground-color);
+      color: var(--symbol-color);
+    
+      --background-color: #181818;
+      --foreground-color: #1f1f1f;
+      --border-color: #353535;
+      --scrollbar-foreground-color: #2b2b2b;
+      --hover-color: #303030;
+      --symbol-color: #9d9d9d;
+    
+      --main-color: #1941DF;
+      --second-color: #3264FF;
+      --main-danger-color: #FF5454;
+      --second-danger-color: #ffd6db;
+      --green-color: #19c37d;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    td, th {
+      border: 0;
+      padding: 8px;
+    }
+
+    td:not(.errors) > tr:nth-child(even) {
+      background-color: var(--hover-color);
+    }
+
+    table th {
+      padding-top: 12px;
+      padding-bottom: 12px;
+      text-align: center;
+      background-color: var(--main-color);
+      color: white;
+    }
+
+    table td {
+      text-align: center;
+    }
+    button, a.button {
+      width: 100%;
+      height: fit-content;
+      width: fit-content;
+      cursor: pointer;
+      background-color: var(--main-color);
+      color: white;
+      padding: 0 20px;
+      border-radius: 0px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 41px;
+      text-decoration: none;
+      border: 0;
+    }
+    #pagination {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    * {
+      font-family: 'Open Sans';
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div>
+      <a href="/">Home</a>
+      <a href="/users-list">Users List</a>
+    </div>
+    <a href="/register">Register</a>
+  </header>
+  <div id="content">
+    <h1>Users List</h1>
+    <table id="userTable">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Photo</th>
+          <th>Name</th>
+          <th>Email</th>
+          <th>Phone</th>
+          <th>Position</th>
+          <th>Register time</th>
+        </tr>
+      </thead>
+      <tbody id="userData">
+        <!-- User data will be inserted here -->
+      </tbody>
+    </table>
+    <div id="pagination"></div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      fetch(`${window.location.origin}/users${window.location.search || '?page=1&count=6'}`)
+        .then(response => response.json())
+        .then(response => {
+          const tableBody = document.getElementById('userData');
+          const pagination = document.getElementById('pagination');
+
+          response.users.forEach(user => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+              <td>${user.id}</td>
+              <td><img src="${user.photo}"/></td>
+              <td>${user.name}</td>
+              <td>${user.email}</td>
+              <td>${user.phone}</td>
+              <td>${user.position}</td>
+              <td>${new Date(+user.registration_timestamp).toLocaleString()}</td>
+              <!-- Add other cells as needed -->
+            `;
+            tableBody.appendChild(row);
+
+            if (response.links.prev_url) {
+              const link = document.createElement('a');
+              link.setAttribute('href', response.links.prev_url);
+              link.setAttribute('class', 'button');
+              link.innerText = "Prev";
+              pagination.appendChild(link);
+            }
+            if (response.links.next_url) {
+              const link = document.createElement('a');
+              link.setAttribute('href', response.links.next_url);
+              link.setAttribute('class', 'button min');
+              link.innerText = "Next";
+              pagination.appendChild(link);
+            }
+          });
+        })
+        .catch(error => console.error('Error fetching user data:', error));
+    });
+  </script>
+</body>
+</html>

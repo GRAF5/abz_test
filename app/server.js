@@ -6,6 +6,7 @@ const DB = require('../models/index');
 const AuthenticationController = require('./controllers/authentication.controller');
 const ContentController = require('./controllers/content.controller');
 const { handler } = require('./classes/errors');
+const path = require("path");
 
 class Server {
 
@@ -42,7 +43,11 @@ class Server {
 
   initRoutes() {
     this.server.use(express.json());
-
+    this.server.set("view engine", "ejs");
+    this.server.set("views", path.join(__dirname, "views"));
+    this.server.get("/", (req, res) => {res.render("index", {})});
+    this.server.get("/users-list", (req, res) => {res.render("users-list", {})});
+    this.server.get("/register", (req, res) => {res.render("register", {})});
     for (let controller of Object.values(this.controllers)) {
       this.server.use('/', controller.router());
     }

@@ -14,7 +14,7 @@ class AuthenticationController extends Controller {
     this.expiresIn = config.jwt.tokenExpiresIn;
     this.usedTokens = new Set();
     this.jobs = [
-      setInterval(this._freeUsedTokensJob, 1 * 60 * 1000)
+      setInterval(this._freeUsedTokensJob.bind(this), 1 * 60 * 1000)
     ];
   }
 
@@ -44,7 +44,6 @@ class AuthenticationController extends Controller {
 
       this.freeUsedTokensJob = false;
     }
-    this.usedTokens.delete()
   }
 
   async generateToken(req, res, next) {

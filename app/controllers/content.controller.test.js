@@ -7,7 +7,7 @@ const ContentController = require('./content.controller');
 const DB = require('../../models/index');
 const tinify = require("tinify");
 const { PutObjectCommand, S3Client } = require("@aws-sdk/client-s3");
-const { NotFound, UnprocessableEntity } = require('../classes/errors');
+const { NotFound, UnprocessableEntity, ConflictError } = require('../classes/errors');
 
 describe("ContentController", () => {
 
@@ -19,8 +19,7 @@ describe("ContentController", () => {
       secretAccessKey: "secretAccessKey",
       bucket: "bucket"
     },
-    photoMaxSizeInMb: 1,
-    usersUrl: "http://users"
+    photoMaxSizeInMb: 1
   };
   let controller;
   let sandbox = sinon.createSandbox();
@@ -336,7 +335,7 @@ describe("ContentController", () => {
         photo: "photo",
         registration_timestamp: 2
       });
-      await controller.getUsers({query: {count: 1, page: 2}}, res, next);
+      await controller.getUsers({query: {count: 1, page: 2}, get: () => {}}, res, next);
       should(res.json.getCall(0).args[0]).be.eql({
         message: undefined,
         success: true,
@@ -345,8 +344,8 @@ describe("ContentController", () => {
         total_users: 3,
         count: 1,
         links: {
-          next_url: `${config.usersUrl}?page=3&count=1`,
-          prev_url: `${config.usersUrl}?page=1&count=1`
+          next_url: `undefined://undefined/users-list?page=3&count=1`,
+          prev_url: `undefined://undefined/users-list?page=1&count=1`
         },
         users: [
           {
@@ -460,6 +459,30 @@ describe("ContentController", () => {
       should(next.getCall(0).args[0]).be.eql(new UnprocessableEntity("Validation failed", [
         {photo: "Image is invalid."}
       ]));
+    });
+
+    it("should check email conflict", async () => {
+      const next = sandbox.spy();
+      let position = await DB.Position.create({name: "test"});
+      body.position_id = position.id;
+      await DB.User.create({
+        ...body,
+        phone: "+380123456678"
+      });
+      await controller.createUser({body, file}, res, next);
+      should(next.getCall(0).args[0]).be.eql(new ConflictError("User with this phone or email already exist"));
+    });
+
+    it("should check phone conflict", async () => {
+      const next = sandbox.spy();
+      let position = await DB.Position.create({name: "test"});
+      body.position_id = position.id;
+      await DB.User.create({
+        ...body,
+        email: "another@test.com"
+      });
+      await controller.createUser({body, file}, res, next);
+      should(next.getCall(0).args[0]).be.eql(new ConflictError("User with this phone or email already exist"));
     });
 
     it("should create user", async () => {
