@@ -25,7 +25,11 @@ class Server {
   }
 
   async stop() {
-
+    for (let controller of Object.values(this.controllers)) {
+      if (controller.stop) {
+        await controller.stop();
+      }
+    }
   }
 
   initControllers() {

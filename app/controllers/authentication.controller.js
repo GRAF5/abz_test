@@ -9,15 +9,42 @@ class AuthenticationController extends Controller {
 
   constructor(config) {
     super();
+    this.config = config;
     this.secret = config.jwt.secret;
     this.expiresIn = config.jwt.tokenExpiresIn;
     this.usedTokens = new Set();
+    this.jobs = [
+      setInterval(this._freeUsedTokensJob, 1 * 60 * 1000)
+    ];
   }
 
   router() {
     const router = Router();
     router.route('/token').get(this.generateToken.bind(this));
     return router;
+  }
+
+  stop() {
+    for(let job of this.jobs) {
+      clearInterval(job);
+    }
+  }
+
+  _freeUsedTokensJob() {
+    if (!this.freeUsedTokensJob) {
+      this.freeUsedTokensJob = true;
+
+      this.usedTokens.forEach(token => {
+        try {
+          jwt.verify(token, this.secret);
+        } catch {
+          this.usedTokens.delete(token);
+        }
+      });
+
+      this.freeUsedTokensJob = false;
+    }
+    this.usedTokens.delete()
   }
 
   async generateToken(req, res, next) {

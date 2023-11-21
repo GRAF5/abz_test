@@ -1,0 +1,37 @@
+name: NodeJS with Gulp
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [18.x]
+    
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ matrix.node-version }}
+    - name: Load MongoDB binary cache
+      id: cache-mongodb-binaries
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/mongodb-binaries
+        key: ${{ matrix.node-version }}
+
+    - name: Build
+      run: |
+        apt-get update
+        apt-get install libcurl4
+        rm -rf node_modules package-lock.json && npm install
+        npx sequelize-cli db:migrate --env test
+        npm test
