@@ -7,7 +7,8 @@ const { PutObjectCommand, S3Client } = require("@aws-sdk/client-s3");
 const tinify = require("tinify");
 const fs = require("fs");
 const Controller = require("../classes/controller.base");
-const { NotFound, UnprocessableEntity } = require("../classes/errors");
+const { NotFound, UnprocessableEntity, ConflictError } = require("../classes/errors");
+const { Op } = require("sequelize");
 
 class ContentController extends Controller {
 
@@ -79,6 +80,19 @@ class ContentController extends Controller {
       if (fails.length) {
         throw new UnprocessableEntity("Validation failed", fails);
       }
+
+      await this.User.findOne({
+        where: {
+          [Op.or]: [
+            {email}, {phone}
+          ]
+        }
+      }).then(user => {
+        if (user) {
+          throw new ConflictError("User with this phone or email already exist");
+        }
+      })
+
       const user = await this.User.create({
         name, 
         email, 
@@ -173,10 +187,10 @@ class ContentController extends Controller {
           throw new NotFound("Page not found");
         }
         if (page > 1) {
-          pageData.links.prev_url = this.config.usersUrl + `?page=${page - 1}&count=${limit}`;
+          pageData.links.prev_url = `${req.protocol}://${req.get('host')}/users-list?page=${page - 1}&count=${limit}`;
         }
         if (page < pageData.total_pages) {
-          pageData.links.next_url = this.config.usersUrl + `?page=${page + 1}&count=${limit}`;
+          pageData.links.next_url = `${req.protocol}://${req.get('host')}/users-list?page=${page + 1}&count=${limit}`;
         }
         users = await this.User.findAll({limit, offset: limit * (page - 1), include: [this.Position]})
           .then(users => users.map(user => {

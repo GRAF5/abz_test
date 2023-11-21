@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>ABZ Test</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Open+Sans');
+    header {
+      background-color: var(--background-color);
+      width: -moz-available; 
+      width: -webkit-fill-available;
+      width: fill-available;
+      display: flex;
+      justify-content: space-between;
+      padding: 0 35px;
+    }
+    header a {
+      color: var(--symbol-color);
+      height: 60px;
+      padding: 0 8px;
+      display: flex;
+      align-items: center;
+      text-decoration: none;
+    }
+    header > div {
+      display: flex;
+    }
+    #content {
+      height: 100%;
+      padding: 0 35px;
+    }
+    body {
+      margin: 0;
+      background-color: var(--foreground-color);
+      color: var(--symbol-color);
+    
+      --background-color: #181818;
+      --foreground-color: #1f1f1f;
+      --border-color: #353535;
+      --scrollbar-foreground-color: #2b2b2b;
+      --hover-color: #303030;
+      --symbol-color: #9d9d9d;
+    
+      --main-color: #1941DF;
+      --second-color: #3264FF;
+      --main-danger-color: #FF5454;
+      --second-danger-color: #ffd6db;
+      --green-color: #19c37d;
+    }    
+    * {
+      font-family: 'Open Sans';
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div>
+      <a href="/">Home</a>
+      <a href="/users-list">Users List</a>
+    </div>
+    <a href="/register">Register</a>
+  </header>
+  <div id="content">
+    <h1>Home</h1>
+    <p>
+      This is a test task by Andrii Bondarchuk for ABZ Agency. The 
+      task involves creating a simple REST API server.
+    </p>
+    <ul>
+      <li><b>Home</b> - The main page with a site map</li>
+      <li><b>Users List</b> - List of all registered users</li>
+      <li><b>Register</b> - Form to register new user</li>
+    </ul>
+    <p>Used technologies stack:</p>
+    <ul>
+      <li>Node.js</li>
+      <li>PostgreSQL</li>
+      <li>ExpressJS</li>
+    </ul>
+    <p>Used third-party technologies:</p>
+    <ul>
+      <li>Sequelize - ORM for work with PostgreSQL</li>
+      <li>Tinify API - for crop images</li>
+      <li>B2 Backblaze - for store images</li>
+      <li>GitHub Actions - for CI</li>
+      <li>Mocha - for unit testing</li>
+    </ul>
+    <p>Used third-party libraries:</p>
+    <ul>
+      <li>@aws-sdk/client-s3 - for connect with Backblaze bucket</li>
+      <li>ejs - for views</li>
+      <li>jsonwebtoken - for token manage</li>
+      <li>multer - for uploading files</li>
+      <li>should | sinon - for unit testing</li>
+    </ul>
+    <p>You can view the full project code here: <a href="https://github.com/GRAF5/abz_test">Github</a></p>
+  </div>
+</body>
+</html>
