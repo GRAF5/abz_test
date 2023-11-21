@@ -1,0 +1,42 @@
+name: NodeJS with Gulp
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:latest
+        ports:
+          - 5432:5432
+        env:
+          POSTGRES_DB: abz_test
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: admin
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '18'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run Sequelize migrations
+        run: npx sequelize-cli db:migrate --env test
+
+      - name: Install mocha
+        run: npm install --save-dev mocha
+
+      - name: Run tests
+        run: npm test 

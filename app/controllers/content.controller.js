@@ -44,9 +44,12 @@ class ContentController extends Controller {
   async getPositions(req, res, next) {
     try {
       const positions = await this.Position.findAll({attributes: ['id', 'name']});
+      if (!positions.length) {
+        throw new NotFound("Page not found");
+      }
       this.response(res, { positions });
     } catch (err) {
-      next(new NotFound("Page not found"));
+      next(err);
     }
   }
 
@@ -64,7 +67,7 @@ class ContentController extends Controller {
       if (!phone || !/^[\+]{0,1}380([0-9]{9})$/.test(phone)) {
         fails.push({phone: "The phone field is required."});
       }
-      if (!position_id || Number.isInteger(position_id) || position_id < 1) {
+      if (!position_id || !Number.isInteger(+position_id) || +position_id < 1) {
         fails.push({position_id: "The position id must be an integer."});
       }
       if (!photo || photo.size > this.config.photoMaxSizeInMb * 1024 * 1024) {
@@ -83,7 +86,7 @@ class ContentController extends Controller {
         position_id,
         registration_timestamp: Date.now()
       });
-      const photoUrl = await this._saveImage(photo, user.id + '.jpg')
+      const photoUrl = await this._saveImage(photo, user.id + '.jpg');
       await user.update({ photo: photoUrl});
       this.response(res, { user_id: user.id }, "New user successfully registered.");
     } catch(err) {
@@ -106,22 +109,25 @@ class ContentController extends Controller {
       Key,
       Bucket: this.config.s3.bucket
     }));
-    fs.rmSync(photo.path);
+    if (fs.existsSync(photo.path)) {
+      fs.rmSync(photo.path);
+    }
     return destination;
   }
 
   async getUser(req, res, next) {
     try {
       const id = +req.params.id;
-  
       if (!Number.isInteger(id)) {
         throw new UnprocessableEntity("Validation failed", [{user_id: "The user_id must be an integer."}]);
       }
   
       const user = await this.User.findByPk(id, {include: [this.Position]}).then(user => {
-        const data = {...user.dataValues, position: user.dataValues.Position.name};
-        delete data.Position;
-        return data;
+        if (user) {
+          const data = {...user.dataValues, position: user.dataValues.Position.name};
+          delete data.Position;
+          return data;
+        }
       });
   
       if (!user) {
@@ -136,14 +142,14 @@ class ContentController extends Controller {
   async getUsers(req, res, next) {
     try {
       const page = +req.query.page;
-      const offset = Math.max(+req.query.offset, 0);
-      const limit = Math.min(+req.query.count || 5, 100);
+      const offset = +req.query.offset;
+      const limit = Math.min(+req.query.count, 100);
       const fails = [];
 
       if (!Number.isInteger(limit))  {
         fails.push({count: "The count must be an integer."});
       }
-      if (!offset && page <= 0) {
+      if (!("offset" in req.query) && page <= 0) {
         fails.push({page: "The page must be at least 1."});
       }
       if (fails.length) {
@@ -152,7 +158,7 @@ class ContentController extends Controller {
       let users = [];
       let pageData = {};
       const total_users = await this.User.count();
-      if (!page) {
+      if ("offset" in req.query) {
         users = await this.User.findAll({limit, offset, include: [this.Position]})
           .then(users => users.map(user => {
             const data = {...user.dataValues, position: user.dataValues.Position.name};
@@ -164,7 +170,7 @@ class ContentController extends Controller {
         pageData.total_pages = Math.ceil(total_users / limit);
         pageData.links = {next_url: null, prev_url: null};
         if (page > pageData.total_pages) {
-          throw NotFound("Page not found");
+          throw new NotFound("Page not found");
         }
         if (page > 1) {
           pageData.links.prev_url = this.config.usersUrl + `?page=${page - 1}&count=${limit}`;
