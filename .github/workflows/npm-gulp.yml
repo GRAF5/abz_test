@@ -35,5 +35,8 @@ jobs:
       - name: Run Sequelize migrations
         run: npx sequelize-cli db:migrate --env test
 
+      - name: Install mocha
+        run: npm install --save-dev mocha
+
       - name: Run tests
         run: npm test 
