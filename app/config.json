@@ -1,3 +1,16 @@
 {
-  
+  "jwt": {
+    "secret": "secret",
+    "tokenExpiresIn": "40m"
+  },
+  "photoMaxSizeInMb": 5,
+  "tinify_key": "Dp062QVYTybjThx61j63MDcbTZNwfR4F",
+  "s3": {
+    "endpoint": "https://s3.eu-central-003.backblazeb2.com",
+    "accessKeyId": "0031d69d4e885e70000000003",
+    "secretAccessKey": "K0036Vr4SE5oM1BnizRFQn/YJL7o+j4",
+    "region": "eu-central-003",
+    "bucket": "abz-test"
+  },
+  "usersUrl": "http://localhost:3000"
 }

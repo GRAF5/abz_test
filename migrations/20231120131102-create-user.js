@@ -15,10 +15,19 @@ module.exports = {
       },
       email: {
         type: Sequelize.STRING,
-        allowNull: false
+        allowNull: false,
+        unique: true
       },
       phone: {
         type: Sequelize.STRING,
+        allowNull: false,
+        unique: true
+      },
+      photo: {
+        type: Sequelize.STRING
+      },
+      registration_timestamp: {
+        type: Sequelize.BIGINT,
         allowNull: false
       }
     });

@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "mocha ./app/**/*.test.js"
   },
   "repository": {
     "type": "git",
@@ -18,12 +18,18 @@
   },
   "homepage": "https://github.com/GRAF5/abz_test#readme",
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.454.0",
     "express": "^4.18.2",
+    "jsonwebtoken": "^9.0.2",
+    "multer": "^1.4.5-lts.1",
     "pg": "^8.11.3",
     "pg-hstore": "^2.3.4",
-    "sequelize": "^6.35.1"
+    "sequelize": "^6.35.1",
+    "tinify": "^1.7.1"
   },
   "devDependencies": {
-    "sequelize-cli": "^6.6.2"
+    "sequelize-cli": "^6.6.2",
+    "should": "^13.2.3",
+    "sinon": "^17.0.1"
   }
 }
