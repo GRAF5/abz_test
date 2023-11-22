@@ -11,7 +11,7 @@ const path = require("path");
 class Server {
 
   constructor() {
-    this.config = process.env.CONFIG || conf;
+    this.config = JSON.parse(process.env.CONFIG) || conf;
     this.controllers = {};
   }
   
@@ -19,8 +19,9 @@ class Server {
     this.server = express();
     this.initControllers();
     this.initRoutes();
-    this.server.listen(3000, () => {
-      console.log('Server listening on port 3000');
+    const host = process.env.HOST || '127.0.0.1';
+    this.server.listen(process.env.PORT || 3000, host, () => {
+      console.log(`Server listening on port ${host}:${process.env.PORT || 3000}`);
     });
     this.registerShutdown();
   }
