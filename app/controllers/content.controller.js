@@ -110,7 +110,7 @@ class ContentController extends Controller {
   async _saveImage(photo, Key) {
     const destination = `${this.config.s3.endpoint}/${this.config.s3.bucket}/${Key}`;
     const Body = await tinify
-      .fromFile(photo.path)
+      .fromBuffer(photo.buffer)
       .resize({
         method: "cover",
         width: 70,
