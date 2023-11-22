@@ -150,8 +150,8 @@
               <!-- Add other cells as needed -->
             `;
             tableBody.appendChild(row);
-
-            if (response.links.prev_url) {
+          });
+          if (response.links.prev_url) {
               const link = document.createElement('a');
               link.setAttribute('href', response.links.prev_url);
               link.setAttribute('class', 'button');
@@ -165,7 +165,6 @@
               link.innerText = "Next";
               pagination.appendChild(link);
             }
-          });
         })
         .catch(error => console.error('Error fetching user data:', error));
     });

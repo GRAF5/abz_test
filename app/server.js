@@ -11,7 +11,7 @@ const path = require("path");
 class Server {
 
   constructor() {
-    this.config = JSON.parse(process.env.CONFIG) || conf;
+    this.config = JSON.parse(process.env.CONFIG || JSON.stringify(conf));
     this.controllers = {};
   }
   

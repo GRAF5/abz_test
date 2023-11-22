@@ -164,9 +164,9 @@
           }
           let fails = [];
           for (let prop of Object.keys(response.fails || {})) {
-            fails = fails.concat(response[prop]);
+            fails = fails.concat(response.fails[prop]);
           }
-          if (response.message) {
+          if (!fails.length && response.message) {
             fails.push(response.message);
           }
           for (let fail of fails) {

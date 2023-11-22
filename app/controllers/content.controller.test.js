@@ -386,12 +386,12 @@ describe("ContentController", () => {
       file = {
         size: 1024,
         mimetype: "image/jpeg",
-        path: "photo.jpg"
+        buffer: Buffer.from("file")
       };
-      tinifyMock = sandbox.stub(tinify, "fromFile").returns({
+      tinifyMock = sandbox.stub(tinify, "fromBuffer").returns({
         resize: sandbox.spy(() => {
           return {
-            toBuffer: async () => Buffer.from(file.path)
+            toBuffer: async () => file.buffer
           }
         })
       });
@@ -491,9 +491,9 @@ describe("ContentController", () => {
       body.position_id = position.id;
       await controller.createUser({body, file}, res, next);
       const user = await DB.User.findOne();
-      should(tinifyMock.getCall(0).args[0]).be.eql(file.path);
+      should(tinifyMock.getCall(0).args[0]).be.eql(file.buffer);
       should(s3Mock.getCall(0).args[0]).be.eql(new PutObjectCommand({
-        Body: Buffer.from(file.path),
+        Body: file.buffer,
         Key: user.id + '.jpg',
         Bucket: config.s3.bucket
       }));
