@@ -2,10 +2,9 @@
 
 const { Router } = require("express");
 const multer  = require('multer')
-const upload = multer({ dest: 'uploads/' });
+const upload = multer({ storage: multer.memoryStorage() });
 const { PutObjectCommand, S3Client } = require("@aws-sdk/client-s3");
 const tinify = require("tinify");
-const fs = require("fs");
 const Controller = require("../classes/controller.base");
 const { NotFound, UnprocessableEntity, ConflictError } = require("../classes/errors");
 const { Op } = require("sequelize");
@@ -123,9 +122,6 @@ class ContentController extends Controller {
       Key,
       Bucket: this.config.s3.bucket
     }));
-    if (fs.existsSync(photo.path)) {
-      fs.rmSync(photo.path);
-    }
     return destination;
   }
 
